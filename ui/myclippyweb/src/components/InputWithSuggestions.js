@@ -3,12 +3,21 @@ import styled from "styled-components"
 import { search, getSong } from "../api/queries"
 
 const Input = styled.input`
-  width: 400px;
-  height: 40px;
+  width: 500px;
+  height: 38px;
   border-radius: 5px;
-  font-size: 16px;
-  padding: 5px 10px;
-  box-shadow: 0px 4px 5px 5px #f2f2f2;
+  font-size: 30px;
+  padding: 20px 40px;
+  box-shadow: 1px 4px 20px 10px rgba(0,0,0,.1);
+  border: none;
+  color: #424242;
+  background-color: rgba(255,255,255,.8);
+  transition: .3s;
+  &:focus {
+    box-shadow: 1px 4px 10px 2px rgba(0,0,0,.1);
+    outline: none;
+
+  }
 `
 
 const Suggestions = styled.div`
@@ -20,7 +29,6 @@ const Suggestions = styled.div`
   box-shadow: 0px 1px 1px 1px #f2f2f2;
 
   div {
-    border-radius: 2px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 5px 20px;
     cursor: pointer;
@@ -39,9 +47,10 @@ const Wrapper = styled.div`
 
 export default function InputWithsuggestions({setSong}) {
   const [query, setQuery] = useState("")
-  const [focused, setFocused] = useState("")
+  const [focused, setFocused] = useState(false)
   const [suggestions, setSuggestions] = useState([])
 
+  const show = suggestions && suggestions.length>0 && focused
   return (
     <Wrapper>
       <Input
@@ -51,16 +60,16 @@ export default function InputWithsuggestions({setSong}) {
           }
         }}
         onFocus={e => setFocused(true)}
-        onBlur={e => setFocused(false)}
+        // onBlur={e => setFocused(false)}
         placeholder="Search a song"
         value={query}
         onChange={e => setQuery(e.target.value)}
       />
-      <Suggestions>
-        {suggestions || focused
+      <Suggestions style={{visibility: show?'visible':'hidden'}}>
+        {show
           ? suggestions.map(({ title, artistName, id: songId }, index) => (
               <div
-                onClick={e => getSong({ songId }).then(res => setSong(res.song))}
+                onClick={e => getSong({ songId }).then(res => setSong(res.song)).then(res => setFocused(false))}
                 key={index}
                 className={index === suggestions.length - 1 ? "last" : null}
               >
