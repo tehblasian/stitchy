@@ -20,7 +20,7 @@ function App() {
     <Main>
       <Title>MyClippy</Title>
       <InputWithsuggestions setSong={song => setSong(song)}/>
-      {song && <SongDisplayer song={song}/>}
+      <SongDisplayer song={song}/>
     </Main>
   );
 }

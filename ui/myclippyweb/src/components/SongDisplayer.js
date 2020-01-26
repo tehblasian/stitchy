@@ -1,5 +1,6 @@
 import React from "react"
 import styled from "styled-components"
+import { split } from "../api/queries"
 
 const Main = styled.div`
   display: flex;
@@ -14,8 +15,6 @@ const Main = styled.div`
 
 function SongDisplayer({ song }) {
   if (!song) return null
-
-  console.log({ song })
   const {
     id,
     genreName,
@@ -31,6 +30,15 @@ function SongDisplayer({ song }) {
     <Main>
       <img alt="Art" src={image} />
       <p>{name}</p>
+      <button
+        onClick={e => {
+          split({ imageUrl: image }).then(res => {
+            console.log({ res })
+          })
+        }}
+      >
+        Generate
+      </button>
     </Main>
   )
 }

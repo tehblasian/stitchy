@@ -23,3 +23,18 @@ export async function getSong({ songId }) {
 
   return results
 }
+
+export async function split({ imageUrl }) {
+  const results = await axios({
+    baseURL: "http://localhost:8080",
+    method: "post",
+    url: "/split",
+    data: {
+      imageUrl,
+    }
+  })
+    .then(res => res.data)
+    .catch(err => console.log({ err }))
+
+  return results
+}
