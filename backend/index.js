@@ -6,8 +6,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const lyricsApi = require('node-lyrics');
-const stopwords = require('stopword');
 
 // SETUP EXPRESS
 const app = express();
@@ -34,7 +32,10 @@ const toHex = (number) => number.toString(16).padStart(2, '0');
  * Compresses the source image
  * @return stock images corresponding to each pixel in the compressed image
  */
-const split = async (inputImageBuffer, lyrics) => {
+const split = async ({
+    inputImageBuffer,
+    songName,
+}) => {
     // Compress image
     const imageBuffer = await sharp(inputImageBuffer)
         .resize(COMPRESSED_IMAGE_RES, COMPRESSED_IMAGE_RES)
@@ -52,44 +53,30 @@ const split = async (inputImageBuffer, lyrics) => {
             Math.abs(r-g) < RGB_THRESHOLD &&
             Math.abs(g-b) < RGB_THRESHOLD) {
 
-                if (r < 110) {
+                if (r < 100) {
                     hexColors.push('black');
-                } else {
+                } else if (r > 240) {
                     hexColors.push('white');
+                } else {
+                    hexColors.push('gray');
                 }
                 continue;
         }
 
         hexColors.push(`${toHex(r)}${toHex(g)}${toHex(b)}`)
     }
-
-    // let out = '';
-    // for (let i = 0; i < COMPRESSED_IMAGE_RES; i++) {
-    //     for (let j = 0; j < COMPRESSED_IMAGE_RES; j++) {
-    //         out += hexColors[i*COMPRESSED_IMAGE_RES + j] + " ";
-    //     }
-    //     out += "\n";
-    // }
-
-    // console.log(out);
-    // return;
-    // const requests = hexColors.map(hexColor => shutterstockApi.get('/v2/images/search', {
-    //     params: {
-    //         query: 'art',
-    //         color: hexColor,
-    //         per_page: 1,
-    //     },
-    // }));
     
-    const numLyrics = lyrics.length;
     const requests = hexColors.map((hexColor, index) => {
-        const bw = (hexColor == 'white' || hexColor == 'black');
+        const bw = (hexColor == 'white' || hexColor == 'black' || hexColor == 'gray');
+        const words = songName.split(" ");
 
         return shutterstockApi.get('/v2/images/search', {
             params: {
-                query: `${lyrics[index % numLyrics]} ${bw ? hexColor : ''}`,
-                color: hexColor,
+                query: `${bw ? hexColor : ''} texture`,
+                color: bw ? 'bw' : hexColor,
+                category: 'Illustrations/Clip-Art',
                 per_page: 1,
+                page: (index%15) + 1,
             },
         });   
     });
@@ -103,14 +90,7 @@ const split = async (inputImageBuffer, lyrics) => {
 app.listen(PORT, () => console.log(`Ready to split on port ${PORT}`));
 
 app.post('/split', async (req, res) => {
-    const { artistName, songTitle, albumCoverUrl } = req.body;
-    
-    // Get lyrics for song
-    const songLyrics = await lyricsApi.parseLyrics(artistName, songTitle);
-    const lyrics = stopwords
-        .removeStopwords(songLyrics.lyrics.replace(/[^a-zA-Z]/g, ' ')
-        .split(' '))
-        .filter(char => char !== '' && char.length > 2);
+    const { songName, albumCoverUrl } = req.body;
 
     // Fetch album cover image from url
     const response = await axios({
@@ -119,7 +99,10 @@ app.post('/split', async (req, res) => {
         responseType: 'arraybuffer',
     });
 
-    const results = await split(response.data, lyrics);
+    const results = await split({
+        inputImageBuffer: response.data,
+        songName,
+    });
     return res.json(results);
 });
 

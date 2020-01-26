@@ -27,13 +27,16 @@ const Title = styled.h1`
 `
 
 function App() {
-  const [song, setSong] = useState()
+  const [song, setSong] = useState();
+  const [album, setAlbum] = useState();
 
   return (
     <Main>
       <Title>Skitchy</Title>
-      <InputWithsuggestions setSong={song => setSong(song)}/>
-      <StitchMosaic />
+      <InputWithsuggestions setSong={song => setSong(song)} setAlbum={setAlbum}/>
+      { song && album &&
+        <StitchMosaic album={album} song={song} />
+      }
     </Main>
   );
 }

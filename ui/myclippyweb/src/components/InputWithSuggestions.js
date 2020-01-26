@@ -45,10 +45,17 @@ const Wrapper = styled.div`
   justify-content: center;
 `
 
-export default function InputWithsuggestions({setSong}) {
+export default function InputWithsuggestions({setSong, setAlbum}) {
   const [query, setQuery] = useState("")
   const [focused, setFocused] = useState(false)
   const [suggestions, setSuggestions] = useState([])
+
+  const clickHandler = async (songId) => {
+    const res = await getSong({ songId });
+    setSong(res.song);
+    setFocused(false);
+    setAlbum(res.song.album.jackets[290]);
+  };
 
   const show = suggestions && suggestions.length>0 && focused
   return (
@@ -69,7 +76,7 @@ export default function InputWithsuggestions({setSong}) {
         {show
           ? suggestions.map(({ title, artistName, id: songId }, index) => (
               <div
-                onClick={e => getSong({ songId }).then(res => setSong(res.song)).then(res => setFocused(false))}
+                onClick={() => clickHandler(songId)}
                 key={index}
                 className={index === suggestions.length - 1 ? "last" : null}
               >
