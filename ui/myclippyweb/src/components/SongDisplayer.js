@@ -4,7 +4,7 @@ import { split } from "../api/queries"
 
 const Main = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
 
   img  {
@@ -15,8 +15,9 @@ const Main = styled.div`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(16, 1fr);
+  grid-template-columns: repeat(25, 1fr);
   transform: scale(.2);
+  width: 100%;
 `
 function SongDisplayer({ song }) {
   const [grid, setGrid] = useState([])

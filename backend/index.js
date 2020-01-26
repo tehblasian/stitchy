@@ -23,7 +23,7 @@ const shutterstockApi = axios.create({
     headers: { 'Authorization': `Basic ${SHUTTERSTOCK_API_TOKEN}`},
 });
 
-const COMPRESSED_IMAGE_RES = 16;
+const COMPRESSED_IMAGE_RES = 25;
 
 
 const toHex = (number) => number.toString(16).padStart(2, '0');
@@ -76,7 +76,7 @@ const split = async ({
                 color: bw ? 'bw' : hexColor,
                 category: 'Illustrations/Clip-Art',
                 per_page: 1,
-                page: (index%15) + 1,
+                page: (index%10) + 1,
             },
         });   
     });

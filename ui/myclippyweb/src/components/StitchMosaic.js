@@ -7,22 +7,25 @@ const TEST_IMAGE_URL = 'https://ace-bootlegs.com/wp-content/uploads/BOOTLEGS%20A
 
 const Main = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
 
     img  {
-        width: 50px;
-        height: 50px;
-        margin-top: -13px;
-        margin-right: -13px;
+        width: 1500px;
+        height: auto;
+    }
+
+    .gridpc {
+        width: 60px;
+        height: auto;
     }
 `
 
 const Grid = styled.div`
     display: grid;
-    grid-template-columns: repeat(16, 1fr);
+    grid-template-columns: repeat(25, 1fr);
     object-fit: scale-down;
-    width: 256px;
+    width: 50%;
 `
 
 const StitchMosaic = ({ album, song }) => {
@@ -38,10 +41,11 @@ const StitchMosaic = ({ album, song }) => {
         splitImage(album);
     }, [album]);
 
-    const renderGrid = images => images.map((item, i) => <img alt="Grid part" src={item.url}/>);
+    const renderGrid = images => images.map((item, i) => <img className="gridpc" alt="Grid part" src={item.url}/>);
 
     return (
         <Main>
+            <img alt="stuff" src={album}/>
             <Grid>
                 {
                     renderGrid(imageUrls)
