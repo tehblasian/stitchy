@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import styled from "styled-components"
-import { debounce } from "debounce";
-import {search} from "../api/queries";
+import {search, getSong} from "../api/queries";
 
 const Input = styled.input`
   width: 400px;
@@ -24,6 +23,7 @@ const Suggestions = styled.div`
     border-radius: 2px;
     border-bottom: 1px solid rgba(0,0,0,0.1);
     padding: 5px 20px;
+    cursor: pointer;
   }
   .last {
     border-bottom: none;
@@ -40,18 +40,21 @@ const Wrapper = styled.div`
 export default function InputWithsuggestions(props) {
   const [query, setQuery] = useState("")
   const [focused, setFocused] = useState("")
-
-  const suggestions = mockData
-
+  const [suggestions, setSuggestions] = useState([])
+  const [song, setSong] = useState([])
+ 
   useEffect(()=>{
-    // debounce(async () => {
-    // }, 300)
-    search({query})
-
-  }, [query])
+    console.log({song})
+  }, song)
   return (
     <Wrapper>
       <Input
+        onKeyDown={e => {
+          if(e.key === "Enter" ){
+            search({query})
+              .then(songs => setSuggestions(songs))
+          }
+        }}
         onFocus={e => setFocused(true)}
         onBlur={e => setFocused(false)}
         placeholder="Search a song"
@@ -60,8 +63,11 @@ export default function InputWithsuggestions(props) {
       />
       <Suggestions>
         {suggestions && focused
-          ? suggestions.map(({ title, artistName }, index) => (
-              <div key={index} className={index === suggestions.length-1 ? 'last' : null}>
+          ? suggestions.map(({ title, artistName, id: songId }, index) => (
+              <div onClick={e => {
+                getSong({songId})
+                  .then(song => setSong(song))
+              }} key={index} className={index === suggestions.length-1 ? 'last' : null}>
                 <h4>{title}</h4>
                 <p>{artistName}</p>
               </div>
