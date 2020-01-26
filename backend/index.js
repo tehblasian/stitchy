@@ -7,6 +7,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const lyricsApi = require('node-lyrics');
+const stopwords = require('stopword');
 
 // SETUP EXPRESS
 const app = express();
@@ -29,7 +30,7 @@ const COMPRESSED_IMAGE_RES = 16;
  * Compresses the source image
  * @return stock images corresponding to each pixel in the compressed image
  */
-const split = async (inputImageBuffer) => {
+const split = async (inputImageBuffer, lyrics) => {
     // Compress image
     const imageBuffer = await sharp(inputImageBuffer)
         .resize(COMPRESSED_IMAGE_RES, COMPRESSED_IMAGE_RES)
@@ -42,12 +43,16 @@ const split = async (inputImageBuffer) => {
         hexColors.push(`${imageBuffer[i].toString(16)}${imageBuffer[i+1].toString(16)}${imageBuffer[i+2].toString(16)}`)
     }
 
-    const requests = hexColors.map(hexColor => shutterstockApi.get('/v2/images/search', {
-        params: {
-            color: hexColor,
-            per_page: 1,
-        },
-    }));
+    const numLyrics = lyrics.length;
+    const requests = hexColors.map((hexColor, index) => {
+        return shutterstockApi.get('/v2/images/search', {
+            params: {
+                query: lyrics[index % numLyrics],
+                color: hexColor,
+                per_page: 1,
+            },
+        });
+    });
     
     const results = await Promise.all(requests);
     const data = results.map(({ data }) => data.data[0]);
@@ -61,7 +66,11 @@ app.post('/split', async (req, res) => {
     const { artistName, songTitle, albumCoverUrl } = req.body;
     
     // Get lyrics for song
-    // const lyrics = await getLyrics({ ...geniusApiOptions, title: songTitle, artist: artistName });
+    const songLyrics = await lyricsApi.parseLyrics(artistName, songTitle);
+    const lyrics = stopwords
+        .removeStopwords(songLyrics.lyrics.replace(/[^a-zA-Z]/g, ' ')
+        .split(' '))
+        .filter(char => char !== '' && char.length > 2);
 
     // Fetch album cover image from url
     const response = await axios({
@@ -69,7 +78,8 @@ app.post('/split', async (req, res) => {
         url: albumCoverUrl,
         responseType: 'arraybuffer',
     });
-    const results = await split(response.data);
+
+    const results = await split(response.data, lyrics);
     return res.json(results);
 });
 
@@ -90,8 +100,10 @@ app.get("/song/:songId", async (req,res)=> {
 });
 
 const test = async () => {
-    const result = await lyricsApi.getSong('Drake', 'One Dance')
-    console.log(result);
+    const result = await lyricsApi.parseLyrics('Drake', 'One Dance');
+    const words = stopwords
+        .removeStopwords(result.lyrics.replace(/[^a-zA-Z]/g, ' ')
+        .split(' '))
+        .filter(char => char !== '' && char.length > 2);
+    console.log(words)
 }
-
-test();

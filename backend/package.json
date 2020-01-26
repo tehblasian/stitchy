@@ -23,6 +23,7 @@
     "node-lyrics": "^2.1.0",
     "nodemon": "^2.0.2",
     "sharp": "^0.24.0",
-    "shutterstock-api": "^1.0.17"
+    "shutterstock-api": "^1.0.17",
+    "stopword": "^0.3.4"
   }
 }
