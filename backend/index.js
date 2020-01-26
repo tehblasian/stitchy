@@ -6,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const lyricsApi = require('node-lyrics');
 
 // SETUP EXPRESS
 const app = express();
@@ -57,10 +58,15 @@ const split = async (inputImageBuffer) => {
 app.listen(PORT, () => console.log(`Ready to split on port ${PORT}`));
 
 app.post('/split', async (req, res) => {
-    const { imageUrl } = req.body;
+    const { artistName, songTitle, albumCoverUrl } = req.body;
+    
+    // Get lyrics for song
+    // const lyrics = await getLyrics({ ...geniusApiOptions, title: songTitle, artist: artistName });
+
+    // Fetch album cover image from url
     const response = await axios({
         method: 'GET',
-        url: imageUrl,
+        url: albumCoverUrl,
         responseType: 'arraybuffer',
     });
     const results = await split(response.data);
@@ -82,3 +88,10 @@ app.get("/song/:songId", async (req,res)=> {
     if(song)
         res.json({song})
 });
+
+const test = async () => {
+    const result = await lyricsApi.getSong('Drake', 'One Dance')
+    console.log(result);
+}
+
+test();

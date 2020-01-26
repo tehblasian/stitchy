@@ -17,7 +17,10 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "genius-lyrics": "^1.0.9",
+    "genius-lyrics-api": "^1.0.3",
     "morgan": "^1.9.1",
+    "node-lyrics": "^2.1.0",
     "nodemon": "^2.0.2",
     "sharp": "^0.24.0",
     "shutterstock-api": "^1.0.17"
