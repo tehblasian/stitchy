@@ -9,16 +9,30 @@ const Main = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-top: 60px;
 
     img  {
-        width: 1500px;
-        height: auto;
+        width: auto;
+        height: 250px;
+        margin-right: 50px;
     }
 
     .gridpc {
-        width: 60px;
+        margin-right: 0px;
+        width: 10px;
         height: auto;
+        transition: .3s;
     }
+
+    .gridpc:hover {
+        transform: scale(2);
+    }
+
+    .gridpc:active{
+        transform: scale(65) translateY(-5px);
+    }
+    margin-bottom: 60px;
+
 `
 
 const Grid = styled.div`

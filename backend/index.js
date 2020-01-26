@@ -76,7 +76,7 @@ const split = async ({
                 color: bw ? 'bw' : hexColor,
                 category: 'Illustrations/Clip-Art',
                 per_page: 1,
-                page: (index%10) + 1,
+                page: (index%20) + 1,
             },
         });   
     });
