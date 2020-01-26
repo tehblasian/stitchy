@@ -1,7 +1,7 @@
 axios = require('axios');
 express = require('express');
 sharp = require('sharp');
-
+const {search,getSong} = require('./catalog.queries')
 const app = express();
 const PORT = 8080;
 const COMPRESSED_IMAGE_RES = 16;
@@ -33,5 +33,20 @@ app.listen(PORT, () => console.log(`Ready to stitch on port ${PORT}`));
 app.post('/stitch', () => {
     stitch();
 });
+
+app.get("/songs/:query", async (req,res)=> {
+    const {query} = req.params
+    const songs = await search({query})
+                        .catch(e => res.status(500).send({error: e}))
+    res.json({songs})
+});
+
+app.get("/song/:songId", async (req,res)=> {
+    const {songId} = req.params
+    const song = await getSong({songId})
+                        .catch(e => res.status(500).send({error: e}))
+    res.json({song})
+});
+
 
 stitch();
