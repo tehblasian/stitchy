@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import styled from "styled-components"
 import { split } from "../api/queries"
 
@@ -13,8 +13,18 @@ const Main = styled.div`
   }
 `
 
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  transform: scale(.2);
+`
 function SongDisplayer({ song }) {
+  const [grid, setGrid] = useState([])
+
   if (!song) return null
+
+  console.log({grid})
+
   const {
     id,
     genreName,
@@ -32,13 +42,18 @@ function SongDisplayer({ song }) {
       <p>{name}</p>
       <button
         onClick={e => {
-          split({ imageUrl: image }).then(res => {
-            console.log({ res })
+          split({ imageUrl: image }).then(images => {
+            setGrid(images)
           })
         }}
       >
         Generate
       </button>
+      <Grid>
+          {grid.map((item, i)=> {
+              return <img alt="Grid part" src={item.assets.preview.url}/>
+          })}
+      </Grid>
     </Main>
   )
 }
