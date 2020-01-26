@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import styled from "styled-components"
-import {search, getSong} from "../api/queries";
+import { search, getSong } from "../api/queries"
 
 const Input = styled.input`
   width: 400px;
@@ -21,7 +21,7 @@ const Suggestions = styled.div`
 
   div {
     border-radius: 2px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 5px 20px;
     cursor: pointer;
   }
@@ -37,37 +37,33 @@ const Wrapper = styled.div`
   justify-content: center;
 `
 
-export default function InputWithsuggestions(props) {
+export default function InputWithsuggestions({setSong}) {
   const [query, setQuery] = useState("")
   const [focused, setFocused] = useState("")
   const [suggestions, setSuggestions] = useState([])
-  const [song, setSong] = useState([])
- 
-  useEffect(()=>{
-    console.log({song})
-  }, song)
+
   return (
     <Wrapper>
       <Input
         onKeyDown={e => {
-          if(e.key === "Enter" ){
-            search({query})
-              .then(songs => setSuggestions(songs))
+          if (e.key === "Enter") {
+            search({ query }).then(songs => setSuggestions(songs))
           }
         }}
-        onFocus={e => setFocused(true)}
-        onBlur={e => setFocused(false)}
+        onFocus={e => setFocused(true)}
+        onBlur={e => setFocused(false)}
         placeholder="Search a song"
         value={query}
         onChange={e => setQuery(e.target.value)}
       />
       <Suggestions>
-        {suggestions && focused
+        {suggestions || focused
           ? suggestions.map(({ title, artistName, id: songId }, index) => (
-              <div onClick={e => {
-                getSong({songId})
-                  .then(song => setSong(song))
-              }} key={index} className={index === suggestions.length-1 ? 'last' : null}>
+              <div
+                onClick={e => getSong({ songId }).then(res => setSong(res.song))}
+                key={index}
+                className={index === suggestions.length - 1 ? "last" : null}
+              >
                 <h4>{title}</h4>
                 <p>{artistName}</p>
               </div>
@@ -78,37 +74,37 @@ export default function InputWithsuggestions(props) {
   )
 }
 
-const mockData = [
-  {
-    id: 45448104,
-    styleName: "Electro - Dance",
-    genreName: "Pop",
-    duration: 178,
-    title: "Purple Hat",
-    artistName: "Sofi Tukker"
-  },
-  {
-    id: 774301,
-    styleName: "Electro - Dance",
-    genreName: "Pop",
-    duration: 178,
-    title: "Purple Hat",
-    artistName: "Sofi Tukker"
-  },
-  {
-    id: 23652808,
-    styleName: "Alt - Rock",
-    genreName: "Rock",
-    duration: 244,
-    title: "Purple",
-    artistName: "Pop Evil"
-  },
-  {
-    id: 80147006,
-    styleName: "R&B - Funk",
-    genreName: "R&B \\ Hip-Hop",
-    duration: 265,
-    title: "Purple",
-    artistName: "Shuggie Otis"
-  }
-]
+// const mockData = [
+//   {
+//     id: 45448104,
+//     styleName: "Electro - Dance",
+//     genreName: "Pop",
+//     duration: 178,
+//     title: "Purple Hat",
+//     artistName: "Sofi Tukker"
+//   },
+//   {
+//     id: 774301,
+//     styleName: "Electro - Dance",
+//     genreName: "Pop",
+//     duration: 178,
+//     title: "Purple Hat",
+//     artistName: "Sofi Tukker"
+//   },
+//   {
+//     id: 23652808,
+//     styleName: "Alt - Rock",
+//     genreName: "Rock",
+//     duration: 244,
+//     title: "Purple",
+//     artistName: "Pop Evil"
+//   },
+//   {
+//     id: 80147006,
+//     styleName: "R&B - Funk",
+//     genreName: "R&B \\ Hip-Hop",
+//     duration: 265,
+//     title: "Purple",
+//     artistName: "Shuggie Otis"
+//   }
+// ]

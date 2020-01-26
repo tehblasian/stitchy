@@ -69,45 +69,16 @@ app.post('/split', async (req, res) => {
 
 app.get("/songs/:query", async (req,res)=> {
     const {query} = req.params
-    const songs = await 
-    
-    ({query})
-                        .catch(e => res.status(500).send({error: e}))
-    res.json({songs})
-});
-
-app.get("/song/:songId", async (req,res)=> {
-    const {songId} = req.params
-    const song = await getSong({songId})
-                        .catch(e => res.status(500).send({error: e}))
-    res.json({song})
-
-});
-
-app.get("/songs/:query", async (req,res)=> {
-    const {query} = req.params
     const songs = await search({query})
                         .catch(e => res.status(500).send({error: e}))
-    res.json({songs})
+    if(songs)
+        res.json({songs})
 });
 
 app.get("/song/:songId", async (req,res)=> {
     const {songId} = req.params
     const song = await getSong({songId})
                         .catch(e => res.status(500).send({error: e}))
-    res.json({song})
-});
-
-app.get("/songs/:query", async (req,res)=> {
-    const {query} = req.params
-    const songs = await search({query})
-                        .catch(e => res.status(500).send({error: e}))
-    res.json({songs})
-});
-
-app.get("/song/:songId", async (req,res)=> {
-    const {songId} = req.params
-    const song = await getSong({songId})
-                        .catch(e => res.status(500).send({error: e}))
-    res.json({song})
+    if(song)
+        res.json({song})
 });
