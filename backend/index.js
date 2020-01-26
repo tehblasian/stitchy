@@ -6,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const nearestColor = require('nearest-color');
 
 // SETUP EXPRESS
 const app = express();
@@ -42,49 +43,76 @@ const split = async ({
         .raw()
         .toBuffer();
 
+    const colorList = {
+        black: 'rgb(0, 0, 0)',
+        gray: 'rgb(210, 210, 210)',
+        white: 'rgb(255, 255, 255)',
+        red: 'rgb(231, 37, 37)',
+        amber: 'rgb(244, 135, 0)',
+        orange: 'rgb(236, 167, 29)',
+        yellow: 'rgb(241, 241, 41)',
+        lime: 'rgb(169, 228, 24)',
+        green: 'rgb(6, 213, 6)',
+        yellow: 'rgb(14, 203, 155)',
+        turqoise: 'rgb(26, 224, 224)',
+        aqua: 'rgb(11, 187, 245)',
+        azure: 'rgb(31, 85, 248)',
+        blue: 'rgb(0, 0, 255)',
+        purple: 'rgb(127, 0, 255)',
+        orchid: 'rgb(191, 0, 255)',
+        magenta: 'rgb(234, 6, 177)',
+    };
+
+    const nearestColorCalculator = nearestColor.from(colorList);
+
     // Convert to hex array
-    let hexColors = [];
+    let colors = [];
     for (i = 0; i < imageBuffer.length; i+=3) {
-        let r = imageBuffer[i];
-        let g = imageBuffer[i+1];
-        let b = imageBuffer[i+2];
-
-        if (Math.abs(r-b) < RGB_THRESHOLD &&
-            Math.abs(r-g) < RGB_THRESHOLD &&
-            Math.abs(g-b) < RGB_THRESHOLD) {
-
-                if (r < 100) {
-                    hexColors.push('black');
-                } else if (r > 240) {
-                    hexColors.push('white');
-                } else {
-                    hexColors.push('gray');
-                }
-                continue;
+        const color = {
+            r: imageBuffer[i],
+            g: imageBuffer[i+1],
+            b: imageBuffer[i+2],
         }
-
-        hexColors.push(`${toHex(r)}${toHex(g)}${toHex(b)}`)
+        
+        colors.push(nearestColorCalculator(color).name);
     }
-    
-    const requests = hexColors.map((hexColor, index) => {
-        const bw = (hexColor == 'white' || hexColor == 'black' || hexColor == 'gray');
-        const words = songName.split(" ");
+
+    const colorMap = colors.reduce((acc, color) => {
+        if (acc[color] == undefined) {
+            return {
+                ...acc,
+                [color]: 1,
+            };
+        }
+        return {
+            ...acc,
+            [color]: acc[color] + 1,
+        };
+    }, {});
+
+    const results = await Promise.all(Object.keys(colorMap).map((color) => {
+        const bw = (color == 'white' || color == 'black' || color == 'gray');
 
         return shutterstockApi.get('/v2/images/search', {
             params: {
-                query: `${bw ? hexColor : ''} texture`,
-                color: bw ? 'bw' : hexColor,
+                query: `${bw ? color : ''} texture`,
+                color: bw ? 'bw' : color,
                 category: 'Illustrations/Clip-Art',
-                per_page: 1,
-                page: (index%20) + 1,
+                per_page: colorMap[color],
             },
-        });   
-    });
+        });
+    }));
 
-    const results = await Promise.all(requests);
-    const data = results.map(({ data }) => data.data[0]);
+    const imageMap = Object.keys(colorMap).reduce((acc, color, index) => {
+        return {
+            ...acc,
+            [color]: results[index].data.data,
+        };
+    }, {});
+
+    const colorImages = colors.map(color => imageMap[color].pop());
     
-    return data;
+    return colorImages;
 }
 
 app.listen(PORT, () => console.log(`Ready to split on port ${PORT}`));
