@@ -24,13 +24,13 @@ export async function getSong({ songId }) {
   return results
 }
 
-export async function split({ imageUrl }) {
+export async function split(albumCoverUrl) {
   const results = await axios({
     baseURL: "http://localhost:8080",
     method: "post",
     url: "/split",
     data: {
-      imageUrl,
+      albumCoverUrl,
     }
   })
     .then(res => res.data)

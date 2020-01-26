@@ -16,6 +16,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 
 const PORT = 8080;
+const RGB_THRESHOLD = 10;
 
 // SETUP SHUTTERSTOCK API
 const SHUTTERSTOCK_API_TOKEN = 'QXJKWVIwUFNybFNGWU53bEVDdHVvYjVRd1ROWURyTEc6QVFRYVRvMWxKcjFHaXM4aw==';
@@ -25,6 +26,9 @@ const shutterstockApi = axios.create({
 });
 
 const COMPRESSED_IMAGE_RES = 16;
+
+
+const toHex = (number) => number.toString(16).padStart(2, '0');
 
 /**
  * Compresses the source image
@@ -40,20 +44,56 @@ const split = async (inputImageBuffer, lyrics) => {
     // Convert to hex array
     let hexColors = [];
     for (i = 0; i < imageBuffer.length; i+=3) {
-        hexColors.push(`${imageBuffer[i].toString(16)}${imageBuffer[i+1].toString(16)}${imageBuffer[i+2].toString(16)}`)
+        let r = imageBuffer[i];
+        let g = imageBuffer[i+1];
+        let b = imageBuffer[i+2];
+
+        if (Math.abs(r-b) < RGB_THRESHOLD &&
+            Math.abs(r-g) < RGB_THRESHOLD &&
+            Math.abs(g-b) < RGB_THRESHOLD) {
+
+                if (r < 110) {
+                    hexColors.push('black');
+                } else {
+                    hexColors.push('white');
+                }
+                continue;
+        }
+
+        hexColors.push(`${toHex(r)}${toHex(g)}${toHex(b)}`)
     }
 
+    // let out = '';
+    // for (let i = 0; i < COMPRESSED_IMAGE_RES; i++) {
+    //     for (let j = 0; j < COMPRESSED_IMAGE_RES; j++) {
+    //         out += hexColors[i*COMPRESSED_IMAGE_RES + j] + " ";
+    //     }
+    //     out += "\n";
+    // }
+
+    // console.log(out);
+    // return;
+    // const requests = hexColors.map(hexColor => shutterstockApi.get('/v2/images/search', {
+    //     params: {
+    //         query: 'art',
+    //         color: hexColor,
+    //         per_page: 1,
+    //     },
+    // }));
+    
     const numLyrics = lyrics.length;
     const requests = hexColors.map((hexColor, index) => {
+        const bw = (hexColor == 'white' || hexColor == 'black');
+
         return shutterstockApi.get('/v2/images/search', {
             params: {
-                query: lyrics[index % numLyrics],
+                query: `${lyrics[index % numLyrics]} ${bw ? hexColor : ''}`,
                 color: hexColor,
                 per_page: 1,
             },
-        });
+        });   
     });
-    
+
     const results = await Promise.all(requests);
     const data = results.map(({ data }) => data.data[0]);
     
@@ -98,12 +138,3 @@ app.get("/song/:songId", async (req,res)=> {
     if(song)
         res.json({song})
 });
-
-const test = async () => {
-    const result = await lyricsApi.parseLyrics('Drake', 'One Dance');
-    const words = stopwords
-        .removeStopwords(result.lyrics.replace(/[^a-zA-Z]/g, ' ')
-        .split(' '))
-        .filter(char => char !== '' && char.length > 2);
-    console.log(words)
-}

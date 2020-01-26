@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import styled from 'styled-components'
+import styled from 'styled-components';
 import InputWithsuggestions from './components/InputWithSuggestions';
-import SongDisplayer from './components/SongDisplayer';
+import StitchMosaic from './components/StitchMosaic';
 
 const Main = styled.div`
   display: flex;
@@ -20,7 +20,7 @@ function App() {
     <Main>
       <Title>MyClippy</Title>
       <InputWithsuggestions setSong={song => setSong(song)}/>
-      <SongDisplayer song={song}/>
+      <StitchMosaic />
     </Main>
   );
 }
