@@ -24,7 +24,7 @@
     "nearest-color": "^0.4.4",
     "nodemon": "^2.0.2",
     "normalize-css-color": "^1.0.2",
-    "sharp": "^0.24.0",
+    "sharp": "^0.30.5",
     "shutterstock-api": "^1.0.17",
     "stopword": "^0.3.4"
   }
